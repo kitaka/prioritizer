@@ -2,6 +2,7 @@ from unittest import TestCase
 from mock import patch, Mock, MagicMock
 from mockredis import mock_strict_redis_client
 from models.caching_steps import StepsCache
+from flask import json
 
 
 def md5_mock():
@@ -75,3 +76,12 @@ class TestStepsCache(TestCase):
         self.assertEquals(self.cache.get_authorized_response("my_http_address"), fake_response)
         urlopen_mock.assert_called_once_with(request_mock)
         request_mock.add_header.assert_called_once_with('Authorization', 'Basic %s' % auth_data)
+
+    def test_retrieve_of_json_data_from_api(self):
+        json_response = json.dumps({"steps": ["step 1", "step 2"]})
+        response_mock = Mock()
+        response_mock.read = Mock(return_value=json_response)
+        self.cache.get_authorized_response = Mock(return_value=response_mock)
+
+
+        self.assertListEqual(self.cache.get_steps_information(), ["step 1", "step 2"])

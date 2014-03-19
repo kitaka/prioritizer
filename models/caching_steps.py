@@ -1,3 +1,4 @@
+from flask import json
 import redis
 import hashlib
 import urllib2, base64
@@ -21,7 +22,11 @@ class StepsCache:
             client.sadd(self.key_name(), self.encode(value))
 
     def get_steps_information(self):
-        return ["test"]
+        url = "http://localhost/script/steps"
+        response = self.get_authorized_response(url)
+
+        data = json.loads(response.read())
+        return data["steps"]
 
     def encode(self, text):
         md5 = hashlib.md5()
