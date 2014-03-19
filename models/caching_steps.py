@@ -1,8 +1,13 @@
 import redis
 import hashlib
+import urllib2, base64
 
 
 class StepsCache:
+
+    def __init__(self, username, password):
+        self.username = username
+        self.password = password
 
     def key_name(self):
         return "ureport-registration-steps"
@@ -16,7 +21,7 @@ class StepsCache:
             client.sadd(self.key_name(), self.encode(value))
 
     def get_steps_information(self):
-        return {}
+        return ["test"]
 
     def encode(self, text):
         md5 = hashlib.md5()
@@ -25,3 +30,10 @@ class StepsCache:
 
     def delete_script_steps_data(self, client):
         client.delete(self.key_name())
+
+    def get_authorized_response(self, url):
+        request = urllib2.Request(url)
+        base64string = base64.encodestring('%s:%s' % (self.username, self.password)).replace('\n', '')
+        request.add_header("Authorization", "Basic %s" % base64string)
+        response = urllib2.urlopen(request)
+        return response
