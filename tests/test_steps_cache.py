@@ -1,5 +1,3 @@
-from . import *
-
 from unittest import TestCase
 from mock import patch, Mock, MagicMock
 from mockredis import mock_strict_redis_client
@@ -23,12 +21,12 @@ class TestStepsCache(TestCase):
     @patch('redis.StrictRedis', mock_strict_redis_client)
     def test_that_data_from_api_is_stored(self):
         cache = StepsCache()
-
-        key_name = "script 1"
+        key_name = "my script"
         first_value = "step 1 1"
         second_value = "step 1 2"
-        data = {key_name: [first_value, second_value]}
+        data = [first_value, second_value]
         encoded_data = {first_value: "encrypted_first_value", second_value: "encrypted_second_value"}
+        cache.key_name = Mock(return_value=key_name)
         cache.get_steps_information = Mock(return_value=data)
         cache.encode = encode_mock(encoded_data)
 
@@ -48,11 +46,14 @@ class TestStepsCache(TestCase):
     def test_that_script_step_data_gets_deleted(self):
         cache = StepsCache()
         client = cache.get_redis_client()
-        script_name = 'script 1'
+        script_name = 'my_script'
         first_step = 'step 1 1'
-        data = {script_name: [first_step]}
         client.sadd(script_name, first_step)
-        cache.get_steps_information = Mock(return_value=data)
+        cache.key_name = Mock(return_value=script_name)
         cache.delete_script_steps_data(client)
 
         self.assertFalse(client.exists(script_name))
+
+    def test_that_key_name_is_ureport(self):
+        cache = StepsCache()
+        self.assertEquals(cache.key_name(), "ureport-registration-steps")
