@@ -4,13 +4,6 @@ from mockredis import mock_strict_redis_client
 from models.caching_steps import StepsCache
 from flask import json
 
-
-def md5_mock():
-    md5 = Mock()
-    md5.update = Mock()
-    md5.digest = Mock(return_value='encrypted_value')
-    return md5
-
 def encode_mock(encode_values):
     def side_effect(args):
         return encode_values[args]
@@ -40,12 +33,6 @@ class TestStepsCache(TestCase):
 
         self.assertTrue(client.sismember(key_name, "encrypted_first_value"))
         self.assertTrue(client.sismember(key_name, "encrypted_second_value"))
-
-    @patch('hashlib.md5', md5_mock)
-    def test_that_encode_text_using_md5(self):
-        text = "important text"
-        encoded_text = self.cache.encode(text)
-        self.assertEquals(encoded_text, 'encrypted_value')
 
     def test_that_script_step_data_gets_deleted(self):
         client = self.cache.get_redis_client()
@@ -82,6 +69,5 @@ class TestStepsCache(TestCase):
         response_mock = Mock()
         response_mock.read = Mock(return_value=json_response)
         self.cache.get_authorized_response = Mock(return_value=response_mock)
-
 
         self.assertListEqual(self.cache.get_steps_information(), ["step 1", "step 2"])
