@@ -6,9 +6,10 @@ import urllib2, base64
 
 class StepsCache:
 
-    def __init__(self, username, password):
+    def __init__(self, username, password, url):
         self.username = username
         self.password = password
+        self.url = url
 
     def key_name(self):
         return "ureport-registration-steps"
@@ -22,8 +23,7 @@ class StepsCache:
             client.sadd(self.key_name(), self.encode(value))
 
     def get_steps_information(self):
-        url = "http://localhost/script/steps"
-        response = self.get_authorized_response(url)
+        response = self.get_authorized_response(self.url)
 
         data = json.loads(response.read())
         return data["steps"]

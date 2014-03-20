@@ -21,7 +21,7 @@ def encode_mock(encode_values):
 class TestStepsCache(TestCase):
 
     def setUp(self):
-        self.cache = StepsCache("username", "password")
+        self.cache = StepsCache("username", "password", "http://random/url")
 
     @patch('redis.StrictRedis', mock_strict_redis_client)
     def test_that_data_from_api_is_stored(self):

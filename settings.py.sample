@@ -1,0 +1,3 @@
+REGISTRATION_STEPS_API_URL = "http://guess_where_if_u_can"
+REGISTRATION_STEPS_API_USERNAME = "Rambo"
+REGISTRATION_STEPS_API_PASSWORD = "Rumble in the Bronx"
