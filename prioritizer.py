@@ -46,7 +46,7 @@ def add_to_blacklist():
     "curl -i -X POST -d 'text=example_text' http://127.0.0.1:5000/add_to_blacklist"
     if request.form['text']:
         client = get_redis_client()
-        blacklist_cache = BlacklistCache(client)
+        blacklist_cache = BlacklistCache(client, app.config["BLACKLIST_CACHE_KEY_NAME"])
         blacklist_cache.add_to_blacklist(request.form['text'])
         return "Successfully added to blacklist"
     else:
