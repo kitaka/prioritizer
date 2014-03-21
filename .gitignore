@@ -1,3 +1,4 @@
 ve
 *.pyc
 .idea/
+settings.py

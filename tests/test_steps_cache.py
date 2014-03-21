@@ -15,7 +15,7 @@ class TestStepsCache(TestCase):
 
     def setUp(self):
         self.client = mock_strict_redis_client()
-        self.cache = StepsCache(self.client, "username", "password", "http://random/url")
+        self.cache = StepsCache(self.client, "username", "password", "http://random/url", "ureport-registration-steps")
 
     @patch('redis.StrictRedis', mock_strict_redis_client)
     def test_that_data_from_api_is_stored(self):
@@ -24,7 +24,7 @@ class TestStepsCache(TestCase):
         second_value = "step 1 2"
         data = [first_value, second_value]
         encoded_data = {first_value: "encrypted_first_value", second_value: "encrypted_second_value"}
-        self.cache.key_name = Mock(return_value=key_name)
+        self.cache.get_key_name = Mock(return_value=key_name)
         self.cache.get_steps_information = Mock(return_value=data)
         self.cache.encoder.encode = encode_mock(encoded_data)
 
@@ -37,13 +37,29 @@ class TestStepsCache(TestCase):
         script_name = 'my_script'
         first_step = 'step 1 1'
         self.client.sadd(script_name, first_step)
-        self.cache.key_name = Mock(return_value=script_name)
+        self.cache.get_key_name = Mock(return_value=script_name)
         self.cache.delete_script_steps_data()
 
         self.assertFalse(self.client.exists(script_name))
 
+    def test_that_method_checks_for_existance_of_text_in_cache_set(self):
+        self.cache.get_steps_information = Mock(return_value=["expected message 1", "expected message 2"])
+        self.cache.add_script_steps_data()
+
+        in_cache = self.cache.has_text("expected message 1")
+
+        self.assertTrue(in_cache)
+
+    def test_that_invalid_text_is_not_in_cache(self):
+        self.cache.get_steps_information = Mock(return_value=["expected message 1", "expected message 2"])
+        self.cache.add_script_steps_data()
+
+        in_cache = self.cache.has_text("none expected message")
+
+        self.assertFalse(in_cache)
+
     def test_that_key_name_is_ureport(self):
-        self.assertEquals(self.cache.key_name(), "ureport-registration-steps")
+        self.assertEquals(self.cache.get_key_name(), "ureport-registration-steps")
 
     @patch('base64.encodestring')
     @patch('urllib2.Request')
