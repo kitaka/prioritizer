@@ -26,7 +26,7 @@ class TestStepsCache(TestCase):
         encoded_data = {first_value: "encrypted_first_value", second_value: "encrypted_second_value"}
         self.cache.key_name = Mock(return_value=key_name)
         self.cache.get_steps_information = Mock(return_value=data)
-        self.cache.encode = encode_mock(encoded_data)
+        self.cache.encoder.encode = encode_mock(encoded_data)
 
         self.cache.add_script_steps_data()
 
