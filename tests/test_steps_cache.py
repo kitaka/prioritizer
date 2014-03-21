@@ -14,11 +14,11 @@ def encode_mock(encode_values):
 class TestStepsCache(TestCase):
 
     def setUp(self):
-        self.cache = StepsCache("username", "password", "http://random/url")
+        self.client = mock_strict_redis_client()
+        self.cache = StepsCache(self.client, "username", "password", "http://random/url")
 
     @patch('redis.StrictRedis', mock_strict_redis_client)
     def test_that_data_from_api_is_stored(self):
-
         key_name = "my script"
         first_value = "step 1 1"
         second_value = "step 1 2"
@@ -28,21 +28,19 @@ class TestStepsCache(TestCase):
         self.cache.get_steps_information = Mock(return_value=data)
         self.cache.encode = encode_mock(encoded_data)
 
-        client = self.cache.get_redis_client()
-        self.cache.add_script_steps_data(client)
+        self.cache.add_script_steps_data()
 
-        self.assertTrue(client.sismember(key_name, "encrypted_first_value"))
-        self.assertTrue(client.sismember(key_name, "encrypted_second_value"))
+        self.assertTrue(self.client.sismember(key_name, "encrypted_first_value"))
+        self.assertTrue(self.client.sismember(key_name, "encrypted_second_value"))
 
     def test_that_script_step_data_gets_deleted(self):
-        client = self.cache.get_redis_client()
         script_name = 'my_script'
         first_step = 'step 1 1'
-        client.sadd(script_name, first_step)
+        self.client.sadd(script_name, first_step)
         self.cache.key_name = Mock(return_value=script_name)
-        self.cache.delete_script_steps_data(client)
+        self.cache.delete_script_steps_data()
 
-        self.assertFalse(client.exists(script_name))
+        self.assertFalse(self.client.exists(script_name))
 
     def test_that_key_name_is_ureport(self):
         self.assertEquals(self.cache.key_name(), "ureport-registration-steps")
