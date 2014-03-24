@@ -1,4 +1,5 @@
 from flask import Flask, request
+from models.receiver_count_filter import ReceiverCountFilter
 import redis
 from models.blacklist_cache import BlacklistCache
 from models.caching_steps import StepsCache
@@ -27,10 +28,16 @@ def get_steps_cache_instance():
 def outgoing_message_router():
     message_filter = RegistrationMessageFilter(get_steps_cache_instance(),
                                                request.args.get('text', None))
-    if message_filter.prioritize() == Priority.HIGH:
-        return "High Priority"
-    else:
-        return "Low Priority"
+
+    receivers = request.args.get('receivers','')
+    receiver_count_filter = ReceiverCountFilter(receivers.split(","), 2)
+
+    filters = [message_filter, receiver_count_filter]
+
+    for filter in filters:
+        if filter.prioritize() == Priority.HIGH:
+            return "High Priority"
+    return "Low Priority"
 
 
 @app.route("/update_script_steps")
