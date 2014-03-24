@@ -1,12 +1,15 @@
 from models.encoder import Encoder
-from models.priority_cache import PriorityCache
 
 
-class BlacklistCache(PriorityCache):
+class BlacklistCache:
 
-    def __init__(self, client, cache_key_name):
-        super(BlacklistCache, self).__init__(client, cache_key_name)
+    def __init__(self, client):
+        self.client = client
+        self.encoder = Encoder()
 
     def add_to_blacklist(self, text):
         encoded_text = self.encoder.encode(text)
-        self.client.sadd(self.get_key_name(), encoded_text)
+        self.client.sadd(self.key_name(), encoded_text)
+
+    def key_name(self):
+        return "ureport-high-priority-blacklist"

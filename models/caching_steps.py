@@ -2,16 +2,20 @@ from flask import json
 import hashlib
 import urllib2, base64
 from models.encoder import Encoder
-from models.priority_cache import PriorityCache
 
 
-class StepsCache(PriorityCache):
+class StepsCache:
 
     def __init__(self, client, username, password, url, cache_key_name):
-        super(StepsCache, self).__init__(client, cache_key_name)
+        self.client = client
         self.username = username
         self.password = password
         self.url = url
+        self.cache_key_name = cache_key_name
+        self.encoder = Encoder()
+
+    def get_key_name(self):
+        return self.cache_key_name
 
     def add_script_steps_data(self):
         script_steps = self.get_steps_information()
