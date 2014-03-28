@@ -1,7 +1,7 @@
 from unittest import TestCase
 from mock import patch, Mock
 from mockredis import mock_strict_redis_client
-from models.blacklist import Blacklist
+from models.prioritylist import Blacklist, ContentTypes, Whitelist
 
 
 class TestBlacklist(TestCase):
@@ -11,6 +11,7 @@ class TestBlacklist(TestCase):
         self.encoder = Mock()
         self.encoder.encode = self.reverse_string
         self.blacklist = Blacklist(self.client, self.encoder)
+        self.whitelist = Whitelist(self.client, self.encoder)
         self.poll_texts_key_name = "blacklist:poll_texts:231"
         self.poll_contacts_key_name = "blacklist:poll_contacts:231"
 
@@ -80,3 +81,9 @@ class TestBlacklist(TestCase):
         self.assertFalse(self.blacklist.has_poll_contact(231, twos))
         self.assertFalse(self.blacklist.has_poll_contact(231, threes))
 
+    def test_that_whitelist_returns_a_valid_key_name(self):
+        text_key_name = self.whitelist.get_key_name(231, ContentTypes.TEXT)
+        contacts_key_name = self.whitelist.get_key_name(231, ContentTypes.CONTACTS)
+
+        self.assertEqual(text_key_name.find("whitelist:"), 0)
+        self.assertEqual(contacts_key_name.find("whitelist:"), 0)

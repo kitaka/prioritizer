@@ -4,14 +4,15 @@ class ContentTypes():
     CONTACTS = "contacts"
 
 
-class BlacklistFoundation:
+class PriorityListFoundation():
 
-    POLL_TEXT_KEY = "blacklist:poll_texts:%s"
-    POLL_CONTACTS_KEY = "blacklist:poll_contacts:%s"
+    POLL_TEXT_KEY = "%s:poll_texts:%s"
+    POLL_CONTACTS_KEY = "%s:poll_contacts:%s"
 
-    def __init__(self, redis_client, encoder):
+    def __init__(self, list_name, redis_client, encoder):
         self.redis_client = redis_client
         self.encoder = encoder
+        self.list_name = list_name
 
     def has(self, poll_id, content_type, contents):
         key_name = self.get_key_name(poll_id, content_type)
@@ -32,9 +33,9 @@ class BlacklistFoundation:
 
     def get_key_name(self, poll_id, content_type):
         if content_type == ContentTypes.TEXT:
-            return self.POLL_TEXT_KEY % poll_id
+            return self.POLL_TEXT_KEY % (self.list_name, poll_id)
         else:
-            return self.POLL_CONTACTS_KEY % poll_id
+            return self.POLL_CONTACTS_KEY % (self.list_name, poll_id)
 
     def get_content_array(self, contents):
         return [contents] if isinstance(contents, basestring) else contents
@@ -50,10 +51,10 @@ class BlacklistFoundation:
         return contents
 
 
-class Blacklist(BlacklistFoundation):
+class PriorityList(PriorityListFoundation):
 
-    def __init__(self, redis_client, encoder):
-        BlacklistFoundation.__init__(self, redis_client, encoder)
+    def __init__(self, list_name, redis_client, encoder):
+        PriorityListFoundation.__init__(self, list_name, redis_client, encoder)
 
     def poll_text(self, poll_id, text):
         self.add(poll_id, ContentTypes.TEXT, text)
@@ -74,4 +75,13 @@ class Blacklist(BlacklistFoundation):
         self.delete(poll_id, ContentTypes.CONTACTS, contacts)
 
 
+class Blacklist(PriorityList):
 
+    def __init__(self, redis_client, encoder):
+        PriorityList.__init__(self, "blacklist", redis_client, encoder)
+
+
+class Whitelist(PriorityList):
+
+    def __init__(self, redis_client, encoder):
+        PriorityList.__init__(self, "whitelist", redis_client, encoder)
