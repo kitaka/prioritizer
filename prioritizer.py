@@ -1,5 +1,6 @@
 from flask import Flask, request
 from models.receiver_count_filter import ReceiverCountFilter
+from models.smsc_router import SMSCRouter
 import redis
 from models.blacklist_cache import BlacklistCache
 from models.caching_steps import StepsCache
@@ -24,6 +25,13 @@ def get_steps_cache_instance():
     return steps_cache
 
 
+def execute_filters(filters):
+    for priority_filter in filters:
+        if priority_filter.prioritize() == Priority.HIGH:
+            return Priority.HIGH
+        return Priority.LOW
+
+
 @app.route("/router", methods=['GET'])
 def outgoing_message_router():
     message_filter = RegistrationMessageFilter(get_steps_cache_instance(),
@@ -33,12 +41,10 @@ def outgoing_message_router():
     receiver_count_filter = ReceiverCountFilter(receivers.split(","), 2)
 
     filters = [message_filter, receiver_count_filter]
+    priority = execute_filters(filters)
 
-    for filter in filters:
-        if filter.prioritize() == Priority.HIGH:
-            return "High Priority"
-    return "Low Priority"
-
+    smsc_router = SMSCRouter(app.config)
+    smsc_router.route(request.args, priority)
 
 @app.route("/update_script_steps")
 def update_script_steps():

@@ -87,3 +87,64 @@ class TestBlacklist(TestCase):
 
         self.assertEqual(text_key_name.find("whitelist:"), 0)
         self.assertEqual(contacts_key_name.find("whitelist:"), 0)
+
+    def test_that_we_can_fetch_the_poll_keys(self):
+        self.blacklist.poll_text(231, "sample 1")
+        self.blacklist.poll_text(232, "sample 2")
+
+        poll_keys = self.blacklist.get_poll_text_keys()
+
+        self.assertTrue('blacklist:poll_texts:231' in poll_keys and 'blacklist:poll_texts:232' in poll_keys)
+
+    def test_that_only_poll_contact_keys_are_returned(self):
+        self.blacklist.poll_contacts(231, "11111111")
+        self.blacklist.poll_text(232, "sample 2")
+
+        poll_contact_keys = self.blacklist.get_poll_contact_keys()
+
+        self.assertEqual(len(poll_contact_keys), 1)
+
+    def test_that_poll_keys_returns_nothing_when_no_poll_text_was_added(self):
+        poll_keys = self.blacklist.get_poll_text_keys()
+        self.assertEqual(poll_keys, [])
+
+    def test_that_poll_keys_are_returned_for_only_the_specific_list_type(self):
+        self.blacklist.poll_text(231, "sample 1")
+        self.whitelist.poll_text(232, "sample 2")
+
+        blacklist_poll_keys = self.blacklist.get_poll_text_keys()
+
+        self.assertEqual(len(blacklist_poll_keys), 1)
+
+    def test_that_polls_have_text(self):
+        self.blacklist.poll_text(231, "sample 1")
+        self.blacklist.poll_text(232, "sample 2")
+
+        self.assertTrue(self.blacklist.contains_text("sample 1"))
+        self.assertTrue(self.blacklist.contains_text("sample 2"))
+
+        self.assertFalse(self.blacklist.contains_text("sample 3"))
+
+    def test_that_polls_have_contact(self):
+        self.blacklist.poll_contacts(231, "sample 1")
+        self.blacklist.poll_contacts(232, "sample 2")
+
+        self.assertTrue(self.blacklist.contains_contact("sample 1"))
+        self.assertTrue(self.blacklist.contains_contact("sample 2"))
+
+        self.assertFalse(self.blacklist.contains_contact("sample 3"))
+
+    def test_that_add_expire_method_gets_called_with_key_name(self):
+        self.blacklist.add_expire = Mock()
+        self.blacklist.poll_text(231, "sample 1")
+
+        self.blacklist.add_expire.assert_called_with("blacklist:poll_texts:231")
+
+    def test_that_add_expire_only_adds_expire_when_no_time_to_live_exists(self):
+        original_expire = self.blacklist.redis_client.expire
+        self.blacklist.redis_client.expire = Mock()
+        self.blacklist.poll_text(231, "sample 1")
+        original_expire("blacklist:poll_texts:231", 86400)
+
+        self.blacklist.poll_text(231, "sample 2")
+        self.blacklist.redis_client.expire.assert_called_once_with("blacklist:poll_texts:231", 86400)
