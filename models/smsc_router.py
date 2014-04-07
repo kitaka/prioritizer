@@ -7,8 +7,11 @@ class SMSCRouter(object):
     def __init__(self, app_config):
         self.app_config = app_config
 
+    def format_receivers_for_kannel(self, request_args):
+        return request_args.replace(",", "+")
+
     def route(self, request_args, priority):
-        url = self.generate_url(request_args["text"], request_args["receivers"], priority)
+        url = self.generate_url(request_args["text"], self.format_receivers_for_kannel(request_args["receivers"]), priority)
         self.make_http_request(url)
 
     def make_http_request(self, url):
