@@ -29,7 +29,8 @@ def execute_filters(filters):
     for priority_filter in filters:
         if priority_filter.prioritize() == Priority.HIGH:
             return Priority.HIGH
-        return Priority.LOW
+
+    return Priority.LOW
 
 
 @app.route("/router", methods=['GET'])
