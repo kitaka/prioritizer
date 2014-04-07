@@ -38,7 +38,7 @@ def outgoing_message_router():
                                                request.args.get('text', None))
 
     receivers = request.args.get('receivers','')
-    receiver_count_filter = ReceiverCountFilter(receivers.split(","), 2)
+    receiver_count_filter = ReceiverCountFilter(receivers.split(","), 1)
 
     filters = [message_filter, receiver_count_filter]
     priority = execute_filters(filters)
