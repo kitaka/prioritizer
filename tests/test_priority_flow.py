@@ -34,5 +34,5 @@ def assert_high_priority(url):
     assert_url_priority(url, "high")
 
 
-assert_high_priority("http://2.2.2.2:5000/router?text=How+did+you+hear+about+U+REPORT?&receivers=256704008979")
-assert_high_priority("http://2.2.2.2:5000/router?text=Hi&receivers=256704008979")
+assert_high_priority("http://2.2.2.2:5000/router?text=How+did+you+hear+about+U+REPORT?&to=256704008979")
+assert_high_priority("http://2.2.2.2:5000/router?text=Hi&to=256704008979")

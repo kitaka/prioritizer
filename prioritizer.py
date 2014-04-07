@@ -38,7 +38,7 @@ def outgoing_message_router():
     message_filter = RegistrationMessageFilter(get_steps_cache_instance(),
                                                request.args.get('text', None))
 
-    receivers = request.args.get('receivers','')
+    receivers = request.args.get('to','')
     receiver_count_filter = ReceiverCountFilter(receivers.split(","), 1)
 
     filters = [message_filter, receiver_count_filter]
