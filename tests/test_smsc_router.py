@@ -62,5 +62,5 @@ class TestSMSCRouter(TestCase):
         return app.config
 
     def get_request_args(self):
-        return {"text":"any message", "receivers":"111111,222222,3333333"}
+        return {"text":"any message", "to":"111111,222222,3333333"}
 
