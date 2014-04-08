@@ -3,10 +3,9 @@ from mock import patch, Mock
 from models.encoder import Encoder
 
 
-def md5_mock():
+def md5_mock(args):
     md5 = Mock()
-    md5.update = Mock()
-    md5.digest = Mock(return_value='encrypted_value')
+    md5.hexdigest = Mock(return_value='encrypted_value')
     return md5
 
 class TestEncoder(TestCase):
