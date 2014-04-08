@@ -1,11 +1,6 @@
 from unittest import TestCase
-from flask import Flask
 from mock import Mock, patch
-from mockredis import mock_strict_redis_client
-from models.blacklist_filter import BlacklistFilter
-from models.encoder import Encoder
 from models.priority import Priority
-from models.prioritylist import Blacklist
 from models.smsc_router import SMSCRouter
 import requests
 
@@ -52,14 +47,17 @@ class TestSMSCRouter(TestCase):
     def test_that_generate_url_method_is_called_with_a_plus_delimited_set_of_receivers(self):
         self.smsc_router.generate_url = Mock()
         self.smsc_router.route(self.get_request_args(), Priority.HIGH)
-        self.smsc_router.generate_url.assert_called_with("any message","111111+222222+3333333",Priority.HIGH)
-
-
+        self.smsc_router.generate_url.assert_called_with("any message", "111111+222222+3333333", Priority.HIGH)
 
     def get_app_config(self):
-        app = Flask(__name__)
-        app.config.from_object('settings')
-        return app.config
+        config = {  "KANNEL_LOW_PRIORITY_SMSC": "1111",
+                    "KANNEL_HIGH_PRIORITY_SMSC": "2222",
+                    "KANNEL_SEND_SMS_URL": "http://0.0.0.0",
+                    "KANNEL_SEND_SMS_FROM": "http://1.1.1.1",
+                    "KANNEL_SEND_SMS_USERNAME": "kannel_username",
+                    "KANNEL_SEND_SMS_PASSWORD": "kannel_password"
+                }
+        return config
 
     def get_request_args(self):
         return {"text":"any message", "to":"111111,222222,3333333"}
