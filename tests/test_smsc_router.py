@@ -45,6 +45,7 @@ class TestSMSCRouter(TestCase):
             self.fail("Exception was not caught")
 
     def test_that_generate_url_method_is_called_with_a_plus_delimited_set_of_receivers(self):
+        self.smsc_router.make_http_request = Mock()
         self.smsc_router.generate_url = Mock()
         self.smsc_router.route(self.get_request_args(), Priority.HIGH)
         self.smsc_router.generate_url.assert_called_with("any message", "111111+222222+3333333", Priority.HIGH)

@@ -47,6 +47,8 @@ def outgoing_message_router():
     smsc_router = SMSCRouter(app.config)
     smsc_router.route(request.args, priority)
 
+    return "Done"
+
 @app.route("/update_script_steps")
 def update_script_steps():
     steps_cache = get_steps_cache_instance()
